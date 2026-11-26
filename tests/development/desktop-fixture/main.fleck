@@ -1,0 +1,13 @@
+<Window xmlns="urn:sunfleck:v1" Title="Sunfleck Desktop Acceptance" Width="680" Height="560">
+  <StackPanel>
+    <TextBlock Id="revision" Text="Revision A"/>
+    <TextBox Id="editor" Text="{Binding Name}"/>
+    <TextBlock Id="mirror" Text="{Binding Name}"/>
+    <Button Id="async" Content="Run async command" Command="{Binding Run}" CommandMode="Async"/>
+    <TextBlock Id="status" Text="{Binding Status}"/>
+    <Button Id="failure" Content="Toggle getter failure" Command="{Binding ToggleFailure}"/>
+    <TextBlock Id="probe" Text="{Binding Probe}"/>
+    <ComboBox Id="combo"><ListItem Text="Alpha"/><ListItem Text="Beta"/></ComboBox>
+    <TreeView Id="tree"><TreeItem Text="Parent"><TreeItem Text="Child A"/><TreeItem Text="Child B"/></TreeItem></TreeView>
+  </StackPanel>
+</Window>

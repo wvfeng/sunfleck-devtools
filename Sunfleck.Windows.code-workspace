@@ -1,0 +1,57 @@
+{
+  "folders": [{ "path": "." }],
+  "settings": {
+    "sunfleck.debugPipe": "sunfleck-example",
+    "sunfleck.serverPath": "${workspaceFolder}/out/windows-dev/service/Sunfleck.Development.dll",
+    "sunfleck.modelFiles": ["${workspaceFolder}/out/windows-dev/app/CounterFleck.fleckmodel.json"],
+    "[fleck]": {
+      "editor.defaultFormatter": "sunfleck.sunfleck",
+      "editor.formatOnSave": true,
+      "editor.tabSize": 2,
+      "editor.insertSpaces": true
+    }
+  },
+  "extensions": { "recommendations": ["ms-dotnettools.csharp"] },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Sunfleck: 准备 Windows 开发环境",
+        "type": "process", "command": "pwsh",
+        "args": ["-NoProfile", "-File", "${workspaceFolder}/tools/development/windows-dev.ps1", "-Action", "Prepare"],
+        "problemMatcher": "$msCompile"
+      },
+      {
+        "label": "Sunfleck: 构建 C# 应用",
+        "type": "process", "command": "pwsh",
+        "args": ["-NoProfile", "-File", "${workspaceFolder}/tools/development/windows-dev.ps1", "-Action", "Build"],
+        "group": { "kind": "build", "isDefault": true }, "problemMatcher": "$msCompile"
+      },
+      {
+        "label": "Sunfleck: 运行（Fleck 保存即更新）",
+        "type": "process", "command": "pwsh",
+        "args": ["-NoProfile", "-File", "${workspaceFolder}/tools/development/windows-dev.ps1", "-Action", "Run"],
+        "problemMatcher": "$msCompile"
+      },
+      {
+        "label": "Sunfleck: C# 热重载（同时监听 Fleck）",
+        "type": "process", "command": "pwsh",
+        "args": ["-NoProfile", "-File", "${workspaceFolder}/tools/development/windows-dev.ps1", "-Action", "Watch"],
+        "problemMatcher": "$msCompile"
+      }
+    ]
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [{
+      "name": "Sunfleck: 调试 C#（Fleck 保存即更新）",
+      "type": "coreclr", "request": "launch",
+      "preLaunchTask": "Sunfleck: 构建 C# 应用",
+      "program": "${workspaceFolder}/out/windows-dev/app/CounterFleck.dll",
+      "args": ["--watch-fleck", "${workspaceFolder}/examples/simple/csharp/fleck/counter.fleck"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "env": { "SUNFLECK_DEBUG_PIPE": "sunfleck-example" }
+    }]
+  }
+}

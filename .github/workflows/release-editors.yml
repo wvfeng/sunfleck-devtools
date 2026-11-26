@@ -1,0 +1,98 @@
+name: Publish editor extensions
+
+on:
+  push:
+    tags: ['vscode-v*', 'visualstudio-v*']
+  workflow_dispatch:
+    inputs:
+      editor:
+        type: choice
+        options: [vscode, visualstudio]
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-2022
+            sdk: windows-x64.zip
+            vscode: win32-x64
+          - runner: ubuntu-24.04
+            sdk: linux-x64.tar.gz
+            vscode: linux-x64
+          - runner: macos-15
+            sdk: macos-arm64.tar.gz
+            vscode: darwin-arm64
+    runs-on: ${{ matrix.runner }}
+    env:
+      EDITOR: ${{ inputs.editor || (startsWith(github.ref_name, 'visualstudio-') && 'visualstudio' || 'vscode') }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        if: env.EDITOR == 'vscode' || runner.os == 'Windows'
+        with:
+          dotnet-version: '10.0.x'
+      - name: Install the SDK and build the language server
+        if: env.EDITOR == 'vscode' || runner.os == 'Windows'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.SUNFLECK_CORE_READ_TOKEN || github.token }}
+          CORE_REPOSITORY: ${{ vars.SUNFLECK_CORE_REPOSITORY || 'wvfeng/sunfleck-core' }}
+          SDK_TAG: ${{ vars.SUNFLECK_SDK_TAG || 'v1.0.0' }}
+          SDK_PLATFORM: ${{ matrix.sdk }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
+          $asset = "Sunfleck-SDK-$env:SDK_PLATFORM"
+          gh release download $env:SDK_TAG --repo $env:CORE_REPOSITORY --pattern $asset --dir out
+          $sdk = New-Item -ItemType Directory out/sdk
+          if ($asset.EndsWith('.zip')) {
+              Expand-Archive "out/$asset" -DestinationPath $sdk
+          } else {
+              tar -xzf "out/$asset" -C $sdk
+          }
+          dotnet build tools/development/Sunfleck.Development.csproj -c Release "-p:SunfleckSdkRoot=$($sdk.FullName)" -o out/server
+      - uses: ./.github/actions/package-vscode
+        if: env.EDITOR == 'vscode'
+        with:
+          target: ${{ matrix.vscode }}
+          server-directory: out/server
+          output-directory: out
+      - name: Build the Visual Studio extension
+        if: env.EDITOR == 'visualstudio' && runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
+          $server = (Resolve-Path out/server).Path
+          dotnet build editors/visualstudio/Sunfleck.VisualStudio.csproj -c Release -p:RestoreLockedMode=true "-p:SunfleckServerDirectory=$server" -o out/visualstudio
+          Copy-Item out/visualstudio/Sunfleck.VisualStudio.vsix out/Sunfleck-Visual-Studio-win-x64.vsix
+      - uses: actions/upload-artifact@v4
+        if: env.EDITOR == 'vscode' || runner.os == 'Windows'
+        with:
+          name: editor-${{ matrix.vscode }}
+          path: out/*.vsix
+          if-no-files-found: error
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: package
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: editor-*
+          merge-multiple: true
+          path: out
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: gh release create --verify-tag --generate-notes "$RELEASE_TAG" out/*.vsix

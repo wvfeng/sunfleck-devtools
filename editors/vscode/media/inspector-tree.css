@@ -1,0 +1,28 @@
+body { margin: 0; padding: 3px 0; color: var(--vscode-foreground); background: var(--vscode-sideBar-background); font-family: var(--vscode-font-family); font-size: var(--vscode-font-size); }
+.row { display: flex; align-items: center; min-height: 22px; padding: 0 6px; white-space: nowrap; cursor: default; user-select: none; }
+.row[hidden] { display: none; }
+.row:hover { background: var(--vscode-list-hoverBackground); color: var(--vscode-list-hoverForeground); }
+.row[aria-selected="true"] { background: var(--vscode-list-inactiveSelectionBackground); }
+.row:focus { outline: 1px solid var(--vscode-focusBorder); outline-offset: -1px; }
+.indent { flex-shrink: 0; }
+.arrow { width: 14px; flex-shrink: 0; text-align: center; }
+.label { flex-shrink: 0; }
+.detail { margin-left: 6px; opacity: .7; overflow: hidden; text-overflow: ellipsis; }
+
+html, body { height: 100%; box-sizing: border-box; }
+body { display: flex; flex-direction: column; }
+#tree { flex: 1; min-height: 0; overflow: auto; }
+#properties { flex: 1; min-height: 0; overflow: auto; padding: 8px; }
+#properties h3 { margin: 0 0 8px; font-size: 12px; }
+#properties h4 { margin: 10px 0 4px; opacity: .8; font-size: 11px; }
+#properties table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 12px; }
+#properties th, #properties td { text-align: left; vertical-align: top; padding: 3px 4px; border-bottom: 1px solid var(--vscode-panel-border); overflow-wrap: anywhere; }
+#properties th { font-weight: normal; }
+#properties .declared { color: var(--vscode-textLink-foreground); }
+.property-title { font-weight: bold; overflow-wrap: anywhere; }
+.locate { margin-left: auto; border: 0; background: transparent; color: var(--vscode-foreground); cursor: pointer; font-size: 17px; }
+.locate[hidden] { display: none; }
+.locate:hover, .locate:focus { background: var(--vscode-toolbar-hoverBackground); outline: 1px solid var(--vscode-focusBorder); }
+
+.runtime-summary { margin: 4px 0; opacity: .8; }
+#properties table th:first-child { width: 45%; }

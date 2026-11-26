@@ -1,0 +1,5 @@
+{
+  "name": "Fleck",
+  "scopeName": "text.xml.fleck",
+  "patterns": [{ "include": "text.xml" }]
+}

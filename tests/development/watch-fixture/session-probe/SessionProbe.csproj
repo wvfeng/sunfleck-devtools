@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="$(SdkWatchPath)/*.dll" />
+    <Reference Include="$(SdkCompilerPath)/Microsoft.CodeAnalysis.dll" />
+    <Reference Include="$(SdkCompilerPath)/Microsoft.CodeAnalysis.CSharp.dll" />
+    <Reference Include="$(SdkCompilerPath)/../../Microsoft.Build*.dll" />
+    <Reference Include="$(SdkCompilerPath)/../../Microsoft.Extensions.Logging.dll" />
+    <Reference Include="$(SdkCompilerPath)/../../Microsoft.Extensions.DependencyInjection.dll" />
+  </ItemGroup>
+  <Target Name="ValidateSdkPaths" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="!Exists('$(SdkWatchPath)/Microsoft.CodeAnalysis.ExternalAccess.HotReload.dll')" Text="Set SdkWatchPath to the installed SDK 11 dotnet-watch any directory." />
+    <Error Condition="!Exists('$(SdkCompilerPath)/Microsoft.CodeAnalysis.CSharp.dll')" Text="Set SdkCompilerPath to the installed SDK 11 Roslyn/bincore directory." />
+  </Target>
+</Project>

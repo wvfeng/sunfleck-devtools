@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/Language Server/">
+    <Project Path="tools/development/Sunfleck.Development.csproj" />
+  </Folder>
+  <Folder Name="/Visual Studio/">
+    <Project Path="editors/visualstudio/Sunfleck.VisualStudio.csproj" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="tests/csharp/Sunfleck.Tests.csproj" />
+  </Folder>
+</Solution>

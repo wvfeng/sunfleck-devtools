@@ -1,0 +1,6 @@
+**/test/**
+**/.vscode/**
+package-lock.json
+scripts/**
+node_modules/**/test/**
+node_modules/**/test.js

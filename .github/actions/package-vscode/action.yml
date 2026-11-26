@@ -1,0 +1,32 @@
+name: Package VS Code extension
+description: Build a platform-specific VSIX with the matching Sunfleck language server.
+inputs:
+  target:
+    description: VS Code target platform
+    required: true
+  server-directory:
+    description: Language server build output relative to the repository root
+    required: true
+  output-directory:
+    description: VSIX output directory relative to the repository root
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Check and package the extension
+      shell: bash
+      working-directory: editors/vscode
+      env:
+        VSIX_TARGET: ${{ inputs.target }}
+        SERVER_DIRECTORY: ${{ inputs.server-directory }}
+        OUTPUT_DIRECTORY: ${{ inputs.output-directory }}
+      run: |
+        npm ci --ignore-scripts
+        npm run check
+        npm run prepare-server -- "../../$SERVER_DIRECTORY"
+        cp ../../LICENSE LICENSE
+        npx --no-install vsce package --allow-missing-repository --target "$VSIX_TARGET" \
+          --out "../../$OUTPUT_DIRECTORY/Sunfleck-VSCode-$VSIX_TARGET.vsix"

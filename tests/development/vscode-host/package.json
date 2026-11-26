@@ -1,0 +1,8 @@
+{
+  "name": "sunfleck-acceptance-host",
+  "publisher": "sunfleck-test",
+  "version": "0.0.1",
+  "engines": { "vscode": "^1.96.0" },
+  "main": "./index.js",
+  "activationEvents": ["onStartupFinished"]
+}

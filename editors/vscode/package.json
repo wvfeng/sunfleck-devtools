@@ -1,0 +1,234 @@
+{
+  "name": "sunfleck",
+  "displayName": "Sunfleck Fleck",
+  "description": "Fleck language service for Sunfleck C, C++ and C# applications.",
+  "version": "1.0.0",
+  "publisher": "sunfleck",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "main": "./extension.js",
+  "activationEvents": [
+    "onLanguage:fleck",
+    "onStartupFinished"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false
+    }
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "fleck",
+        "aliases": [
+          "Fleck"
+        ],
+        "extensions": [
+          ".fleck"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "fleck",
+        "scopeName": "text.xml.fleck",
+        "path": "./syntaxes/fleck.tmLanguage.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "sunfleck.restartLanguageServer",
+        "title": "Sunfleck: 重启语言服务"
+      },
+      {
+        "command": "sunfleck.inspectSnapshot",
+        "title": "Sunfleck: 连接调试应用"
+      },
+      {
+        "command": "sunfleck.closeSnapshot",
+        "title": "Sunfleck: 断开调试应用",
+        "icon": "$(close)",
+        "enablement": "sunfleck.snapshotOpen"
+      },
+      {
+        "command": "sunfleck.runDevelopmentTask",
+        "title": "Sunfleck: 运行开发任务"
+      },
+      {
+        "command": "sunfleck.locateRuntimeObject",
+        "title": "Sunfleck: 从源码定位运行时对象",
+        "enablement": "sunfleck.snapshotOpen"
+      },
+      {
+        "command": "sunfleck.restartLanguageServerEnglish",
+        "title": "Sunfleck: Restart Language Server"
+      },
+      {
+        "command": "sunfleck.inspectSnapshotEnglish",
+        "title": "Sunfleck: Connect Debug Application"
+      },
+      {
+        "command": "sunfleck.closeSnapshotEnglish",
+        "title": "Sunfleck: Disconnect Debug Application",
+        "icon": "$(close)",
+        "enablement": "sunfleck.snapshotOpen"
+      },
+      {
+        "command": "sunfleck.runDevelopmentTaskEnglish",
+        "title": "Sunfleck: Run Development Task"
+      },
+      {
+        "command": "sunfleck.locateRuntimeObjectEnglish",
+        "title": "Sunfleck: Find Runtime Object at Source",
+        "enablement": "sunfleck.snapshotOpen"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "sunfleck.restartLanguageServer",
+          "when": "!sunfleck.english"
+        },
+        {
+          "command": "sunfleck.inspectSnapshot",
+          "when": "!sunfleck.english"
+        },
+        {
+          "command": "sunfleck.closeSnapshot",
+          "when": "!sunfleck.english"
+        },
+        {
+          "command": "sunfleck.runDevelopmentTask",
+          "when": "!sunfleck.english"
+        },
+        {
+          "command": "sunfleck.locateRuntimeObject",
+          "when": "!sunfleck.english"
+        },
+        {
+          "command": "sunfleck.restartLanguageServerEnglish",
+          "when": "sunfleck.english"
+        },
+        {
+          "command": "sunfleck.inspectSnapshotEnglish",
+          "when": "sunfleck.english"
+        },
+        {
+          "command": "sunfleck.closeSnapshotEnglish",
+          "when": "sunfleck.english"
+        },
+        {
+          "command": "sunfleck.runDevelopmentTaskEnglish",
+          "when": "sunfleck.english"
+        },
+        {
+          "command": "sunfleck.locateRuntimeObjectEnglish",
+          "when": "sunfleck.english"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "sunfleck.closeSnapshot",
+          "when": "view == sunfleck.objects && sunfleck.snapshotOpen && !sunfleck.english",
+          "group": "navigation"
+        },
+        {
+          "command": "sunfleck.closeSnapshotEnglish",
+          "when": "view == sunfleck.objects && sunfleck.snapshotOpen && sunfleck.english",
+          "group": "navigation"
+        }
+      ]
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "sunfleck.objects",
+          "type": "webview",
+          "name": "Sunfleck 对象树"
+        }
+      ],
+      "sunfleck.inspector": [
+        {
+          "id": "sunfleck.properties",
+          "type": "webview",
+          "name": "Sunfleck 元素属性"
+        }
+      ]
+    },
+    "configurationDefaults": {
+      "[fleck]": {
+        "editor.formatOnType": true,
+        "editor.formatOnSave": true,
+        "editor.semanticHighlighting.enabled": true
+      }
+    },
+    "configuration": {
+      "title": "Sunfleck",
+      "properties": {
+        "sunfleck.language": {
+          "type": "string",
+          "enum": [
+            "zh-CN",
+            "en"
+          ],
+          "default": "zh-CN",
+          "scope": "application",
+          "description": "开发工具界面语言 / Development tools display language."
+        },
+        "sunfleck.serverPath": {
+          "type": "string",
+          "scope": "resource",
+          "default": "",
+          "description": "语言服务路径，留空使用随包或工作区版本。 / Language server path. Leave empty to use the bundled or workspace server."
+        },
+        "sunfleck.dotnetPath": {
+          "type": "string",
+          "scope": "resource",
+          "default": "dotnet",
+          "description": ".NET 10 可执行文件路径。 / Path to the .NET 10 dotnet executable."
+        },
+        "sunfleck.modelFiles": {
+          "type": "array",
+          "scope": "resource",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "模型元数据路径，留空时搜索当前工作区文件夹。 / Model metadata paths. Leave empty to discover files in the current workspace folder."
+        },
+        "sunfleck.debugPipe": {
+          "type": "string",
+          "scope": "resource",
+          "default": "",
+          "description": "本机调试服务的 Named Pipe 名称。 / Local debug service Named Pipe name."
+        }
+      }
+    },
+    "viewsContainers": {
+      "panel": [
+        {
+          "id": "sunfleck.inspector",
+          "title": "Sunfleck",
+          "icon": "media/inspector.svg"
+        }
+      ]
+    }
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "scripts": {
+    "check": "node --check extension.js && node --check inspector.js && node --check inspector-tree.js && node --check media/inspector-tree.js && node --check media/inspector-properties.js && node --check configuration.js && node --check language.js && node --check scripts/prepare-server.js",
+    "prepare-server": "node scripts/prepare-server.js",
+    "package": "npm run prepare-server && vsce package --allow-missing-repository"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "3.2.1"
+  }
+}

@@ -1,0 +1,8 @@
+<Project>
+  <!-- Import in business projects and provide SunfleckDevelopmentTool plus SunfleckModel items. -->
+  <Target Name="SunfleckExportModels" AfterTargets="Build"
+          Condition="'@(SunfleckModel)' != '' and '$(SunfleckDevelopmentTool)' != ''">
+    <Error Condition="!Exists('$(SunfleckDevelopmentTool)')" Text="Sunfleck development tool was not built: $(SunfleckDevelopmentTool)" />
+    <Exec Command="dotnet &quot;$(SunfleckDevelopmentTool)&quot; model &quot;$(TargetPath)&quot; &quot;$(TargetDir)$(AssemblyName).fleckmodel.json&quot; @(SunfleckModel->'&quot;%(Identity)&quot;', ' ')" />
+  </Target>
+</Project>

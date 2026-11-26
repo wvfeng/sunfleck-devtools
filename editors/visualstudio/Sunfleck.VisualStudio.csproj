@@ -1,0 +1,65 @@
+<Project>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <Version>1.0.0</Version>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <GeneratePkgDefFile>true</GeneratePkgDefFile>
+    <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
+    <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
+    <CopyOutputSymbolsToOutputDirectory>false</CopyOutputSymbolsToOutputDirectory>
+    <UseCodebase>true</UseCodebase>
+    <DeployExtension>false</DeployExtension>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <SunfleckServerDirectory Condition="'$(SunfleckServerDirectory)' == ''">$(MSBuildThisFileDirectory)..\..\out\devtools\tools\development</SunfleckServerDirectory>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../tools/development/FleckDocument.cs" Link="FleckDocument.cs" />
+    <Compile Include="../../tools/development/FleckFormatter.cs" Link="FleckFormatter.cs" />
+    <Reference Include="System.Xml.Linq" />
+    <PackageReference Include="Microsoft.VisualStudio.LanguageServer.Client" Version="17.14.60" />
+    <PackageReference Include="Microsoft.VisualStudio.CoreUtility" Version="17.14.275" />
+    <PackageReference Include="Microsoft.VisualStudio.Text.UI.Wpf" Version="17.14.249" />
+    <PackageReference Include="Microsoft.VisualStudio.Shell.15.0" Version="17.14.40264" />
+    <PackageReference Include="EnvDTE" Version="17.14.40260" />
+    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.14.2142" PrivateAssets="all" GeneratePathProperty="true" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Content Include="source.extension.vsixmanifest" />
+    <Content Include="../../LICENSE">
+      <Link>LICENSE</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="Fleck.pkgdef">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="$(SunfleckServerDirectory)\*" Exclude="$(SunfleckServerDirectory)\*.pdb">
+      <Link>server\%(Filename)%(Extension)</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(SunfleckServerDirectory)\types\Elements.cs">
+      <Link>server\types\Elements.cs</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="$(SunfleckServerDirectory)\types\Components.cs">
+      <Link>server\types\Components.cs</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Target Name="CheckSunfleckServer" BeforeTargets="Build">
+    <Error Condition="!Exists('$(SunfleckServerDirectory)\Sunfleck.Development.dll')" Text="Build sunfleck_development first or set SunfleckServerDirectory." />
+  </Target>
+  <Target Name="VerifySunfleckVsix" AfterTargets="CreateVsixContainer" Condition="Exists('$(TargetVsixContainer)')">
+    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)..\..\tests\development\check-vsix.ps1&quot; -Package &quot;$(TargetVsixContainer)&quot;" />
+  </Target>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+  <Import Project="$(PkgMicrosoft_VSSDK_BuildTools)\tools\vssdk\Microsoft.VsSDK.targets" />
+</Project>
