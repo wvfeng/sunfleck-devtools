@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<title>Sunfleck Web Inspector Regression</title>
+<style>
+  :root { color-scheme: light dark; font: 16px system-ui; }
+  body { margin: 40px; }
+  #controls { position: relative; display: flex; gap: 16px; padding: 24px; width: max-content; }
+  button { width: 144px; height: 46px; }
+  [data-highlighted] { outline: 2px solid #3095fa; outline-offset: 2px; }
+  [data-picking] { cursor: crosshair; }
+  [data-picking] button { cursor: inherit; }
+  #template { position: absolute; left: 24px; width: 22px; height: 46px; }
+</style>
+<h1>Web 检查器回归</h1>
+<div id="controls" data-node="2">
+  <button data-node="3">Primary</button>
+  <button data-node="4">Secondary</button>
+  <span id="template" data-node="5" aria-hidden="true"></span>
+</div>
+<p id="status" aria-live="polite">等待检查器</p>
+<script type="module" src="./fixture.js"></script>
+</html>

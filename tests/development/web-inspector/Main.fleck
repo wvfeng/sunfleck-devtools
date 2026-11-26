@@ -1,0 +1,6 @@
+<Window xmlns="urn:sunfleck:v1" Title="Web Inspector Regression">
+  <StackPanel Id="controls">
+    <Button Id="primary" Text="Primary" Width="144"/>
+    <Button Id="secondary" Text="Secondary" Width="144"/>
+  </StackPanel>
+</Window>

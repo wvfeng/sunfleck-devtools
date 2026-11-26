@@ -1,6 +1,18 @@
 # 开发工具测试入口
 
-所有命令从仓库根目录执行。依赖和基础构建见 [构建与测试](../../../core/docs/building.md)，当前验证范围见 [验证与复现](../../../core/docs/validation.md)。运行时调试只使用 Named Pipe；测试可以保存结果 JSON 和截图作为证据，这些产物不参与应用与 IDE 通信。
+所有命令从仓库根目录执行。依赖和基础构建见 [构建与测试](../../../core/docs/building.md)，当前验证范围见 [验证与复现](../../../core/docs/validation.md)。桌面运行时调试使用 Named Pipe，Web 检查器通过本机 HTTP 连接。测试结果和截图可单独保存。
+
+## Web 检查器回归
+
+使用 .NET 10 运行协议回归。
+
+```powershell
+dotnet run --project tests/development/web-inspector --no-launch-profile -- --verify
+```
+
+测试启动临时本机端口，用扩展的 HTTP 客户端检查 gzip 快照、属性当前值和默认值、模板相对路径、高亮、拾取、取消和重连。
+
+在独立 Visual Studio 实例中打开 [Sunfleck.WebInspector.Regression.slnx](web-inspector/Sunfleck.WebInspector.Regression.slnx)，打开项目中的 Main.fleck 后按 F5。工程会启动本机页面，检查器自动连接。展开 primary 下的 Border，点击该行的「定位源码」，应跳到 ActionTemplate.fleck 第 3 行第 3 列。选择 primary 可检查 Width 当前值 144、默认值 0。浏览器页面用五个固定节点模拟运行时。真实 Wasm 验收可使用文档站工程。
 
 ## 三语言项目 F12
 

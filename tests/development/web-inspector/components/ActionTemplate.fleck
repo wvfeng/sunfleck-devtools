@@ -1,0 +1,6 @@
+<ControlTemplate xmlns="urn:sunfleck:v1" Namespace="urn:sunfleck:test"
+                 Class="ActionTemplate" TargetType="Button">
+  <Border CornerRadius="5">
+    <ContentPresenter/>
+  </Border>
+</ControlTemplate>

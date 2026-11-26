@@ -33,11 +33,10 @@ function render() {
             const label = document.createElement('span'); label.className = 'label';
             const detail = document.createElement('span'); detail.className = 'detail';
             const locate = document.createElement('button'); locate.className = 'locate';
-            locate.textContent = '⌖'; locate.title = t('定位源码', 'Go to source'); locate.setAttribute('aria-label', locate.title);
+            locate.title = t('定位源码', 'Go to source'); locate.setAttribute('aria-label', locate.title);
             element.append(indent, arrow, label, detail, locate); elements.set(row.id, element);
         }
         element.children[0].textContent = '\u00a0\u00a0'.repeat(row.depth);
-        element.children[1].textContent = row.expandable ? (expanded.has(row.id) ? '⌄' : '›') : '';
         element.children[2].textContent = row.label; element.children[3].textContent = row.description;
         element.children[4].hidden = !row.locatable;
         element.title = [row.label, row.description].filter(Boolean).join(' · ');
@@ -95,7 +94,7 @@ tree.addEventListener('keydown', event => {
 });
 window.addEventListener('message', event => {
     const message = event.data;
-    if (message.type === 'tree') { rows = message.rows; selected = message.selected || selected; byId = new Map(rows.map(r => [r.id, r])); render(); }
+    if (message.type === 'tree') { rows = message.rows; selected = message.selected || ''; byId = new Map(rows.map(r => [r.id, r])); render(); }
     if (message.type === 'reveal') {
         let row = rows.find(r => r.id === message.id); selected = message.id;
         while (row?.parent) { expanded.add(row.parent); row = rows.find(r => r.id === row.parent); }

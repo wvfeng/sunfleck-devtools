@@ -2,19 +2,36 @@ name: Publish editor extensions
 
 on:
   push:
-    tags: ['vscode-v*', 'visualstudio-v*']
+    tags: ['v*', 'vscode-v*', 'visualstudio-v*']
   workflow_dispatch:
     inputs:
       editor:
+        description: Extension to build (auto selects by tag prefix, or both)
         type: choice
-        options: [vscode, visualstudio]
+        options: [auto, vscode, visualstudio]
+        default: auto
         required: true
+      release_tag:
+        description: Existing tag to build and publish (leave empty to build only)
+        type: string
 
 permissions:
   contents: read
 
+concurrency:
+  group: editor-release-${{ inputs.release_tag || github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  RELEASE_TAG: ${{ inputs.release_tag || (github.ref_type == 'tag' && github.ref_name || '') }}
+  EDITOR: ${{ github.event_name == 'workflow_dispatch' && inputs.editor != 'auto' && inputs.editor
+    || (startsWith(inputs.release_tag || github.ref_name, 'vscode-v') && 'vscode')
+    || (startsWith(inputs.release_tag || github.ref_name, 'visualstudio-v') && 'visualstudio')
+    || 'all' }}
+
 jobs:
   package:
+    if: ${{ !github.event.deleted }}
     strategy:
       fail-fast: false
       matrix:
@@ -29,16 +46,17 @@ jobs:
             sdk: macos-arm64.tar.gz
             vscode: darwin-arm64
     runs-on: ${{ matrix.runner }}
-    env:
-      EDITOR: ${{ inputs.editor || (startsWith(github.ref_name, 'visualstudio-') && 'visualstudio' || 'vscode') }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag && format('refs/tags/{0}', inputs.release_tag) || github.ref }}
+          persist-credentials: false
       - uses: actions/setup-dotnet@v4
-        if: env.EDITOR == 'vscode' || runner.os == 'Windows'
+        if: env.EDITOR != 'visualstudio' || runner.os == 'Windows'
         with:
           dotnet-version: '10.0.x'
       - name: Install the SDK and build the language server
-        if: env.EDITOR == 'vscode' || runner.os == 'Windows'
+        if: env.EDITOR != 'visualstudio' || runner.os == 'Windows'
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.SUNFLECK_CORE_READ_TOKEN || github.token }}
@@ -58,29 +76,34 @@ jobs:
           }
           dotnet build tools/development/Sunfleck.Development.csproj -c Release "-p:SunfleckSdkRoot=$($sdk.FullName)" -o out/server
       - uses: ./.github/actions/package-vscode
-        if: env.EDITOR == 'vscode'
+        if: env.EDITOR != 'visualstudio'
         with:
           target: ${{ matrix.vscode }}
           server-directory: out/server
           output-directory: out
+      - uses: microsoft/setup-msbuild@v2
+        if: env.EDITOR != 'vscode' && runner.os == 'Windows'
+        with:
+          msbuild-architecture: x64
       - name: Build the Visual Studio extension
-        if: env.EDITOR == 'visualstudio' && runner.os == 'Windows'
+        if: env.EDITOR != 'vscode' && runner.os == 'Windows'
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
           $PSNativeCommandUseErrorActionPreference = $true
           $server = (Resolve-Path out/server).Path
-          dotnet build editors/visualstudio/Sunfleck.VisualStudio.csproj -c Release -p:RestoreLockedMode=true "-p:SunfleckServerDirectory=$server" -o out/visualstudio
+          $output = Join-Path $PWD 'out/visualstudio'
+          msbuild editors/visualstudio/Sunfleck.VisualStudio.csproj -restore -p:Configuration=Release -p:RestoreLockedMode=true "-p:SunfleckServerDirectory=$server" "-p:OutDir=$output/"
           Copy-Item out/visualstudio/Sunfleck.VisualStudio.vsix out/Sunfleck-Visual-Studio-win-x64.vsix
       - uses: actions/upload-artifact@v4
-        if: env.EDITOR == 'vscode' || runner.os == 'Windows'
+        if: env.EDITOR != 'visualstudio' || runner.os == 'Windows'
         with:
           name: editor-${{ matrix.vscode }}
           path: out/*.vsix
           if-no-files-found: error
 
   publish:
-    if: startsWith(github.ref, 'refs/tags/')
+    if: github.event_name == 'push' || inputs.release_tag != ''
     needs: package
     runs-on: ubuntu-24.04
     permissions:
@@ -91,8 +114,32 @@ jobs:
           pattern: editor-*
           merge-multiple: true
           path: out
-      - env:
+      - name: Publish editor extensions
+        shell: bash
+        env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: ${{ github.ref_name }}
-        run: gh release create --verify-tag --generate-notes "$RELEASE_TAG" out/*.vsix
+        run: |
+          assets=()
+          if [[ "$EDITOR" != visualstudio ]]; then
+            assets+=(out/Sunfleck-VSCode-{win32-x64,linux-x64,darwin-arm64}.vsix)
+          fi
+          if [[ "$EDITOR" != vscode ]]; then
+            assets+=(out/Sunfleck-Visual-Studio-win-x64.vsix)
+          fi
+          for asset in "${assets[@]}"; do
+            test -s "$asset"
+          done
+
+          if gh release view --json isDraft,assets -- "$RELEASE_TAG" > release.json; then
+            for asset in "${assets[@]}"; do
+              if ! jq -e --arg name "${asset##*/}" 'any(.assets[]; .name == $name and .state == "uploaded")' release.json > /dev/null; then
+                gh release upload --clobber -- "$RELEASE_TAG" "$asset"
+              fi
+            done
+            if jq -e '.isDraft' release.json > /dev/null; then
+              gh release edit --draft=false -- "$RELEASE_TAG"
+            fi
+          else
+            gh release create --verify-tag --generate-notes -- "$RELEASE_TAG" "${assets[@]}"
+          fi

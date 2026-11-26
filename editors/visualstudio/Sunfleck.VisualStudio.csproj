@@ -2,7 +2,7 @@
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
@@ -19,6 +19,7 @@
     <Compile Include="../../tools/development/FleckDocument.cs" Link="FleckDocument.cs" />
     <Compile Include="../../tools/development/FleckFormatter.cs" Link="FleckFormatter.cs" />
     <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Net.Http" />
     <PackageReference Include="Microsoft.VisualStudio.LanguageServer.Client" Version="17.14.60" />
     <PackageReference Include="Microsoft.VisualStudio.CoreUtility" Version="17.14.275" />
     <PackageReference Include="Microsoft.VisualStudio.Text.UI.Wpf" Version="17.14.249" />
@@ -30,6 +31,7 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Page Include="InspectorTreeStyles.xaml" />
     <Content Include="source.extension.vsixmanifest" />
     <Content Include="../../LICENSE">
       <Link>LICENSE</Link>

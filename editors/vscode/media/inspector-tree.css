@@ -5,9 +5,21 @@ body { margin: 0; padding: 3px 0; color: var(--vscode-foreground); background: v
 .row[aria-selected="true"] { background: var(--vscode-list-inactiveSelectionBackground); }
 .row:focus { outline: 1px solid var(--vscode-focusBorder); outline-offset: -1px; }
 .indent { flex-shrink: 0; }
-.arrow { width: 14px; flex-shrink: 0; text-align: center; }
+.arrow { display: grid; place-items: center; width: 14px; align-self: stretch; flex-shrink: 0; }
+.row[aria-expanded] > .arrow::before {
+    content: "";
+    box-sizing: border-box;
+    width: 6px;
+    height: 6px;
+    border-right: 1px solid currentColor;
+    border-bottom: 1px solid currentColor;
+    pointer-events: none;
+    transform: translateX(-1px) rotate(-45deg);
+}
+.row[aria-expanded="true"] > .arrow::before { transform: translateY(-1px) rotate(45deg); }
 .label { flex-shrink: 0; }
-.detail { margin-left: 6px; opacity: .7; overflow: hidden; text-overflow: ellipsis; }
+.label, .detail { line-height: 18px; }
+.detail { margin-left: 6px; min-width: 0; opacity: .7; overflow: hidden; text-overflow: ellipsis; }
 
 html, body { height: 100%; box-sizing: border-box; }
 body { display: flex; flex-direction: column; }
@@ -20,9 +32,35 @@ body { display: flex; flex-direction: column; }
 #properties th { font-weight: normal; }
 #properties .declared { color: var(--vscode-textLink-foreground); }
 .property-title { font-weight: bold; overflow-wrap: anywhere; }
-.locate { margin-left: auto; border: 0; background: transparent; color: var(--vscode-foreground); cursor: pointer; font-size: 17px; }
+.locate {
+    display: grid;
+    place-items: center;
+    flex: 0 0 22px;
+    height: 22px;
+    margin-left: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 3px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+/* Draw the ring and tick marks as one 12px silhouette. */
+.locate::before {
+    content: "";
+    width: 12px;
+    height: 12px;
+    background: currentColor;
+    mask:
+        radial-gradient(circle, transparent 3.15px, #000 3.85px 4.15px, transparent 4.85px),
+        linear-gradient(90deg, transparent 5px, #000 6px, transparent 7px) top / 100% 3px no-repeat,
+        linear-gradient(90deg, transparent 5px, #000 6px, transparent 7px) bottom / 100% 3px no-repeat,
+        linear-gradient(transparent 5px, #000 6px, transparent 7px) left / 3px 100% no-repeat,
+        linear-gradient(transparent 5px, #000 6px, transparent 7px) right / 3px 100% no-repeat;
+}
 .locate[hidden] { display: none; }
-.locate:hover, .locate:focus { background: var(--vscode-toolbar-hoverBackground); outline: 1px solid var(--vscode-focusBorder); }
+.locate:hover { background: var(--vscode-toolbar-hoverBackground); }
+.locate:focus-visible { outline: 1px solid var(--vscode-focusBorder); outline-offset: -1px; }
 
 .runtime-summary { margin: 4px 0; opacity: .8; }
 #properties table th:first-child { width: 45%; }

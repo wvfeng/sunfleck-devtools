@@ -50,12 +50,11 @@ async function run() {
     await receive({ type: 'select', id: 'node:2' });
     assert.equal(messages.at(-1).selected, 'node:2');
     assert.deepEqual(commands.pop(), ['sunfleck.properties.focus', { preserveFocus: true }]);
-    assert.equal(messages.at(-1).rows[1].node.properties[0].value, 30);
+    assert.equal(messages.at(-1).rows[1].node, undefined, 'Object tree rows only carry display metadata');
     await receive({ type: 'locate', id: 'node:2', command: 'untrusted-command' });
     assert.deepEqual(commands, [['sunfleck.inspectObject', '2', true]]);
     leaf.node.properties[0].value = 42;
     await receive({ type: 'ready' });
-    assert.equal(messages.at(-1).rows[1].node.properties[0].value, 42);
     const propertyMessages = [];
     let propertyDispose, propertyVisibility, propertyReceive, propertyShows = 0;
     const makePropertiesView = () => ({ visible: true, show(preserve) { assert.equal(preserve, true); propertyShows++; },

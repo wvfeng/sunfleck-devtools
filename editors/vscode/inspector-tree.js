@@ -32,7 +32,7 @@ function createInspectorTree(context, provider, hover) {
                 row.node.scopePath === previous.scopePath && row.node.source?.uri === previous.source?.uri)?.id : undefined;
         }
         items = next;
-        if (view) await view.webview.postMessage({ type: 'tree', rows, selected });
+        if (view) await view.webview.postMessage({ type: 'tree', rows: rows.map(({ node, ...row }) => row), selected });
         await updateProperties();
     }
     async function updateProperties() {
@@ -96,6 +96,7 @@ function createInspectorTree(context, provider, hover) {
     return {
         get visible() { return !!view?.visible; },
         set title(value) { title = value; if (view) view.title = value; if (propertiesView) propertiesView.title = tr('Sunfleck 元素属性', 'Sunfleck Properties'); },
+        reset() { selected = undefined; items.clear(); ++revision; },
         async reveal(item) {
             selected = item.id;
             view?.show(true);
